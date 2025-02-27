@@ -38,80 +38,83 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    const allGradeSelects = document.querySelectorAll('select[id^="igcse-"], select[id^="as-"], select[id^="alevel-"]');
+    
+    // Function to update available options
+    function updateAvailableOptions() {
+        allGradeSelects.forEach(select => {
+            select.disabled = false;
+            Array.from(select.options).forEach(option => {
+                option.disabled = false;
+            });
+        });
+    }
+
+    // Add change event listener to all grade selects
+    allGradeSelects.forEach(select => {
+        select.addEventListener('change', updateAvailableOptions);
+    });
+
     // Function to calculate the score
     function calculateScore() {
-        // Reset animations first
+        // Reset animations
         document.querySelectorAll('.result-row').forEach(row => {
             row.classList.remove('show');
         });
 
+        let totalPercentage = 0;
         let totalSubjects = 0;
-        let totalScore = 0;
-        const maxPossibleScore = 410;
 
         // Helper function to add grades
-        function addGrades(elementId, value) {
-            const count = parseInt(document.getElementById(elementId).value);
+        function addGrades(elementId, percentage) {
+            const count = parseInt(document.getElementById(elementId).value) || 0;
             if (count > 0) {
+                totalPercentage += percentage * count;
                 totalSubjects += count;
-                totalScore += count * value;
             }
         }
 
         // IGCSE Letter Grades
-        addGrades('igcse-astar', 9);
-        addGrades('igcse-a', 8);
-        addGrades('igcse-b', 7);
-        addGrades('igcse-c', 6);
-
+        addGrades('igcse-astar', 100);  // A* = 100%
+        addGrades('igcse-a', 95);       // A  = 95%
+        addGrades('igcse-b', 85);       // B  = 85%
+        addGrades('igcse-c', 70);       // C  = 70%
+        
         // IGCSE Numeric Grades
-        addGrades('igcse-9', 9);
-        addGrades('igcse-8', 8);
-        addGrades('igcse-7', 7);
-        addGrades('igcse-6', 6);
-        addGrades('igcse-5', 5);
-        addGrades('igcse-4', 4);
+        addGrades('igcse-9', 100);      // 9 = A* = 100%
+        addGrades('igcse-8', 100);      // 8 = A  = 100%
+        addGrades('igcse-7', 95);       // 7 = B  = 95%
+        addGrades('igcse-6', 88);       // 6 = C  = 88%
+        addGrades('igcse-5', 82);       // 5 = c  = 82%
+        addGrades('igcse-4', 70);       // 4 = E  = 70%
 
-        // AS Levels
-        addGrades('as-a', 10);
-        addGrades('as-b', 8);
-        addGrades('as-c', 6);
-        addGrades('as-d', 4);
+        // AS and A Levels
+        addGrades('as-a', 95);          // A  = 95%
+        addGrades('as-b', 85);          // B  = 85%
+        addGrades('as-c', 70);          // C  = 70%
+        addGrades('as-d', 60);          // D  = 60%
 
-        // A Levels
-        addGrades('alevel-astar', 20);
-        addGrades('alevel-a', 16);
-        addGrades('alevel-b', 12);
-        addGrades('alevel-c', 8);
-        addGrades('alevel-d', 4);
+        addGrades('alevel-astar', 100); // A* = 100%
+        addGrades('alevel-a', 95);      // A  = 95%
+        addGrades('alevel-b', 85);      // B  = 85%
+        addGrades('alevel-c', 70);      // C  = 70%
+        addGrades('alevel-d', 60);      // D  = 60%
 
-        // Calculate percentage per subject
-        let percentagePerSubject = 0;
-        if (totalSubjects > 0) {
-            percentagePerSubject = 70 / totalSubjects; // 70% divided by number of subjects
-        }
+        // Calculate average percentage
+        let averagePercentage = totalSubjects > 0 ? totalPercentage / totalSubjects : 0;
 
-        // Calculate final score
-        let finalScore = (percentagePerSubject * maxPossibleScore) / 100;
-
-        // Apply factor if checked
-        const withFactor = document.getElementById('factor-checkbox').checked;
-        if (withFactor) {
-            finalScore = Math.round(finalScore * 1.1); // 10% bonus
-        }
+        // Calculate final score based on average percentage
+        let finalScore = (averagePercentage / 100) * 410;
 
         // Apply sports bonus if entered
         const sportsBonus = document.getElementById('sports-bonus').value;
         if (sportsBonus && !isNaN(sportsBonus)) {
-            finalScore += parseInt(sportsBonus);
+            finalScore += parseFloat(sportsBonus);
         }
 
-        // Calculate final percentage
-        const percentage = Math.round((finalScore / maxPossibleScore) * 100);
-
-        // Update display
-        document.getElementById('score-percentage').textContent = percentage;
-        document.getElementById('government-score').textContent = Math.round(finalScore);
+        // Update display with 2 decimal places
+        document.getElementById('score-percentage').textContent = averagePercentage.toFixed(2);
+        document.getElementById('government-score').textContent = finalScore.toFixed(2);
 
         // Show results with animation
         setTimeout(showResults, 100);
@@ -138,5 +141,16 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.result-row').forEach(row => {
             row.classList.remove('show');
         });
+
+        // Enable all selects and their options
+        allGradeSelects.forEach(select => {
+            select.disabled = false;
+            Array.from(select.options).forEach(option => {
+                option.disabled = false;
+            });
+        });
     }
+
+    // Initial update of available options
+    updateAvailableOptions();
 });
