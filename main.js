@@ -106,11 +106,23 @@ document.addEventListener('DOMContentLoaded', function() {
         // Calculate final score based on average percentage
         let finalScore = (averagePercentage / 100) * 410;
 
+        // Apply 10% bonus if checkbox is checked
+        const applyBonus = document.getElementById('factor-checkbox').checked;
+        if (applyBonus) {
+            finalScore = finalScore * 1.1; // Add 10% bonus
+            averagePercentage = averagePercentage * 1.1; // Adjust percentage too
+        }
+
         // Apply sports bonus if entered
         const sportsBonus = document.getElementById('sports-bonus').value;
         if (sportsBonus && !isNaN(sportsBonus)) {
             finalScore += parseFloat(sportsBonus);
+            // Adjust percentage for sports bonus
+            averagePercentage = (finalScore / 410) * 100;
         }
+
+        // Cap percentage at 100%
+        averagePercentage = Math.min(averagePercentage, 100);
 
         // Update display with 2 decimal places
         document.getElementById('score-percentage').textContent = averagePercentage.toFixed(2);
